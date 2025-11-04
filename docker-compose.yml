@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  api:
+    build: ./backend
+    ports:
+      # Change the host port from 5000 to 5002
+      - '5002:5001' # HOST PORT:CONTAINER PORT
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      # ... (rest of environment variables) ...
+    depends_on:
+      - mongo
+  
+  frontend:
+    build: ./frontend
+    ports:
+      - '5173:5173'
+    # ... (rest of frontend config) ...
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - '27017:27017'
+    # ... (rest of mongo config) ...

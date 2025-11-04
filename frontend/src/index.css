@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- THEMES --- */
+:root {
+  --color-primary: #8B5CF6; 
+  --color-primary-dark: #7c3aed;
+  --bg-main: #111827; 
+  --bg-card: #1F2937;
+  --bg-input: #111827;
+  --text-primary: #ffffff;
+  --text-secondary: #9CA3AF;
+  --border-color: #374151;
+}
+
+.light-theme {
+  --color-primary: #8B5CF6;
+  --color-primary-dark: #7c3aed;
+  --bg-main: #ffffff;           /* Pure white base */
+  --bg-card: #f9fafb;           /* Very light clean gray */
+  --bg-input: #ffffff;
+  --text-primary: #1F2937;
+  --text-secondary: #6B727F;
+  --border-color: #e5e7eb;       
+}
+
+/* --- BASE STYLES FIX --- */
+body {
+  @apply bg-bg-main text-text-primary;
+  font-family: 'Inter', sans-serif;
+  /* FIX: REMOVED ALL BACKGROUND IMAGE/ANIMATION FROM BODY */
+}
+
+/* --- ANIMATION KEYFRAMES --- */
+@keyframes subtle-shift {
+    from { background-position: 0 0; }
+    to { background-position: 0 50px; }
+}
+
+/* --- FINAL UI COMPONENT STYLES (The Fix) --- */
+@layer components {
+  /* Utility/Base Styles */
+  .input-field {
+    @apply w-full p-3 bg-bg-input border border-border-color rounded-md text-text-primary placeholder-text-secondary;
+  }
+  .btn-primary {
+    @apply bg-primary text-white font-semibold py-3 px-6 rounded-md transition-all hover:bg-primary-dark disabled:opacity-50;
+  }
+
+  /* --- 2. NEW TEXTURE CLASS FOR HOME.JSX DIV --- */
+  .minimal-art-texture {
+    /* FIX: This class contains the unique background and animation */
+    background-image: repeating-linear-gradient(
+      to bottom,
+      var(--bg-main) 0px,
+      var(--bg-main) 1px,
+      var(--bg-card) 1px, 
+      var(--bg-card) 2px
+    );
+    background-size: 100% 50px; 
+    animation: subtle-shift 60s linear infinite; 
+  }
+  
+  /* Auth Structural Fixes (No Change) */
+  .dot-grid-bg {
+    background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: -10px -10px;
+  }
+  .auth-layout {
+    @apply min-h-screen grid grid-cols-1 md:grid-cols-2;
+  }
+  .auth-brand-side {
+    @apply hidden md:flex flex-col justify-between p-12 bg-gray-900 text-white relative overflow-hidden;
+    background-image: linear-gradient(145deg, #111827 0%, #1f2937 100%);
+  }
+  .auth-brand-side > * {
+    z-index: 10;
+    position: relative;
+  }
+  .auth-form-side {
+    @apply flex items-center justify-center p-8 dot-grid-bg;
+    background-color: var(--bg-card);
+    background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+  }
+}

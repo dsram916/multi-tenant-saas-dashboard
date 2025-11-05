@@ -1,12 +1,11 @@
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
-// --- CRITICAL DEPLOYMENT CHANGE ---
-// Use the final, live domain for your API backend
-const API_URL = 'https://multi-tenant-saas-dashboard.onrender.com'; // **REPLACE THIS WITH YOUR ACTUAL DEPLOYED API URL**
+// --- FINAL CONNECTION LOGIC ---
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5005'; 
+// It will use the Vercel ENV variable in production, or localhost in dev.
 
 export default axios.create({
-  // Local development will still proxy correctly through Vite.
-  // For Vercel/Production, the full URL is required.
+  // In production, Vercel frontend connects to the full API_URL
   baseURL: import.meta.env.PROD ? API_URL + '/api' : '/api', 
 });

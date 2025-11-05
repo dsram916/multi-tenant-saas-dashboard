@@ -1,5 +1,12 @@
 import rateLimit from 'express-rate-limit';
 
+// --- ADD THIS HELPER FUNCTION ---
+// Render requires you to trust proxy headers
+const renderKeyGenerator = (req) => {
+    // This safely extracts the client IP when running behind a proxy like Render
+    return req.ip; 
+};
+
 // 1. General API Limit (e.g., 100 requests per 15 minutes)
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -9,9 +16,11 @@ export const apiLimiter = rateLimit({
   message: JSON.stringify({
     message: 'Too many requests, please try again after 15 minutes.',
   }),
-  // Use status 429 (Too Many Requests)
   statusCode: 429,
   headers: true,
+  // --- ADD THIS ---
+  keyGenerator: renderKeyGenerator,
+  trustProxy: 1, 
 });
 
 // 2. Auth/Login Specific Limit (e.g., 5 requests per 5 minutes to prevent brute force)
@@ -25,8 +34,7 @@ export const authLimiter = rateLimit({
   }),
   statusCode: 429,
   headers: true,
-  keyGenerator: (req) => {
-    // We use the IP, but you could also add email from req.body.email if needed
-    return req.ip; 
-  },
+  // --- ADD THIS ---
+  keyGenerator: renderKeyGenerator,
+  trustProxy: 1, 
 });

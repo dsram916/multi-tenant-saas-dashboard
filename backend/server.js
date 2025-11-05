@@ -7,30 +7,45 @@ import path from 'path';
 import { fileURLToPath } from 'url'; 
 import { logger, correlationIdMiddleware } from './middleware/logMiddleware.js';
 import { apiLimiter, authLimiter } from './middleware/rateLimitMiddleware.js';
-
-// Import all routes
-import authRoutes from './routes/authRoutes.js';
-import bookRoutes from './routes/bookRoutes.js';
-import tenantRoutes from './routes/tenantRoutes.js';
-import publicRoutes from './routes/publicRoutes.js';
-import uploadRoutes from './routes/uploadRoutes.js'; 
+import connectDB from './config/db.js'; 
 
 dotenv.config();
-connectDB(); // Assuming connectDB is imported correctly
+connectDB(); 
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+// --- FIX: Tell Express to trust the proxy headers for accurate IP identification (CRITICAL for Render) ---
+app.set('trust proxy', 1); 
 
-// --- FIX: Define __dirname for ES Modules ---
+const PORT = process.env.PORT || 5001; 
+
+// --- Define __dirname for ES Modules ---
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename); // __dirname is now the backend directory
+const __dirname = path.dirname(__filename);
+
+// --- Dynamic CORS Origin for Production ---
+const allowedOrigins = [
+    'http://localhost:5173', // Local Dev
+    // Note: You must replace the below with your actual deployed Vercel and Render domains
+    'https://[your-render-api-domain].onrender.com', 
+    'https://[your-vercel-domain].vercel.app', 
+];
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or local requests)
+    if (!origin) return callback(null, true);
+    // Allow requests from the defined list
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true,
 }));
 
 // Rate Limiting and Logging
+// NOTE: Rate limiters are now stable because 'trust proxy' is set above.
 app.use(apiLimiter);
 app.use(correlationIdMiddleware);
 app.use(logger);
@@ -47,9 +62,7 @@ app.use('/api/tenants', tenantRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/upload', uploadRoutes);
 
-// --- CRITICAL FIX: STATIC FILE SERVING ---
-// We use the new, reliable __dirname variable which points to the 'backend' folder.
-// This guarantees the path 'bookstore-saas/backend/uploads' is found.
+// --- STATIC FILE SERVING (CRITICAL for images) ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.listen(PORT, () => {

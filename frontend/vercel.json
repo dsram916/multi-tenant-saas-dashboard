@@ -1,8 +1,10 @@
 {
+    "version": 2,
     "rewrites": [
       {
-        "source": "/(.*)",
-        "destination": "/index.html"
+        "source": "/api/(.*)",
+        // IMPORTANT: Replace the placeholder below with your actual, live Render API URL!
+        "destination": "https://multi-tenant-saas-dashboard.onrender.com/api/$1"
       }
     ]
   }
